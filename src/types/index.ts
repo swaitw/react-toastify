@@ -1,4 +1,5 @@
-import * as React from 'react';
+import React from 'react';
+import { CloseButtonProps, IconProps } from '../components';
 
 type Nullable<T> = {
   [P in keyof T]: T[P] | null;
@@ -22,9 +23,9 @@ export interface ToastContentProps<Data = {}> {
   data?: Data;
 }
 
-export type ToastContent =
+export type ToastContent<T = unknown> =
   | React.ReactNode
-  | ((props: ToastContentProps) => React.ReactNode);
+  | ((props: ToastContentProps<T>) => React.ReactNode);
 
 export type Id = number | string;
 
@@ -58,7 +59,7 @@ interface CommonOptions {
   pauseOnHover?: boolean;
 
   /**
-   * Pause the toast when the window loose focus.
+   * Pause the toast when the window loses focus.
    * `Default: true`
    */
   pauseOnFocusLoss?: boolean;
@@ -88,9 +89,9 @@ interface CommonOptions {
    * To remove the close button pass `false`
    */
   closeButton?:
-    | React.ReactElement
-    | ((props: any) => React.ReactElement)
-    | boolean;
+    | boolean
+    | ((props: CloseButtonProps) => React.ReactNode)
+    | React.ReactElement<CloseButtonProps>;
 
   /**
    * An optional css class to set for the progress bar.
@@ -169,7 +170,13 @@ interface CommonOptions {
    * Used to display a custom icon. Set it to `false` to prevent
    * the icons from being displayed
    */
-  icon?: React.ReactNode | false;
+  icon?:
+    | boolean
+    | ((props: IconProps) => React.ReactNode)
+    | React.ReactElement<IconProps>
+    | string
+    | number
+    | React.ReactNode;
 
   /**
    * Theme to use.
@@ -231,12 +238,12 @@ export interface ToastOptions<Data = {}> extends CommonOptions {
   data?: Data;
 }
 
-export interface UpdateOptions extends Nullable<ToastOptions> {
+export interface UpdateOptions<T = unknown> extends Nullable<ToastOptions<T>> {
   /**
    * Used to update a toast.
    * Pass any valid ReactNode(string, number, component)
    */
-  render?: ToastContent;
+  render?: ToastContent<T>;
 }
 
 export interface ToastContainerProps extends CommonOptions {
@@ -307,6 +314,7 @@ export interface ToastProps extends ToastOptions {
   deleteToast: () => void;
   theme: Theme;
   type: TypeOptions;
+  iconOut?: React.ReactNode;
 }
 
 /**
@@ -317,9 +325,23 @@ export interface NotValidatedToastProps extends Partial<ToastProps> {
 }
 
 /**
- * @INTERAL
+ * @INTERNAL
  */
 export interface Toast {
   content: ToastContent;
   props: ToastProps;
+}
+
+export type ToastItemStatus = 'added' | 'removed' | 'updated';
+
+export interface ToastItem<Data = {}> {
+  content: React.ReactNode;
+  id: Id;
+  theme?: Theme;
+  type?: TypeOptions;
+  isLoading?: boolean;
+  containerId?: Id;
+  data: Data;
+  icon?: React.ReactNode | false;
+  status: ToastItemStatus;
 }

@@ -1,19 +1,15 @@
-import * as React from 'react';
+import React from 'react';
 import cx from 'clsx';
 
 import { ProgressBar } from './ProgressBar';
-import { Icons } from './Icons';
+import { CloseButton } from './CloseButton';
 import { ToastProps } from '../types';
-import { Default, isFn, isStr } from '../utils';
-import { useToast } from '../hooks';
+import { Default, isFn } from '../utils';
+import { useToast } from '../hooks/useToast';
 
 export const Toast: React.FC<ToastProps> = props => {
-  const {
-    isRunning,
-    preventExitTransition,
-    toastRef,
-    eventHandlers
-  } = useToast(props);
+  const { isRunning, preventExitTransition, toastRef, eventHandlers } =
+    useToast(props);
   const {
     closeButton,
     children,
@@ -38,7 +34,7 @@ export const Toast: React.FC<ToastProps> = props => {
     deleteToast,
     isIn,
     isLoading,
-    icon,
+    iconOut,
     theme
   } = props;
   const defaultClassName = cx(
@@ -58,31 +54,18 @@ export const Toast: React.FC<ToastProps> = props => {
       })
     : cx(defaultClassName, className);
   const isProgressControlled = !!progress;
-  const maybeIcon = Icons[type as keyof typeof Icons];
-  const iconProps = { theme, type };
-  let Icon: React.ReactNode = maybeIcon && maybeIcon(iconProps);
 
-  if (icon === false) {
-    Icon = void 0;
-  } else if (isFn(icon)) {
-    Icon = icon(iconProps);
-  } else if (React.isValidElement(icon)) {
-    Icon = React.cloneElement(icon, iconProps);
-  } else if (isStr(icon)) {
-    Icon = icon;
-  } else if (isLoading) {
-    Icon = Icons.spinner();
-  }
+  const closeButtonProps = { closeToast, type, theme };
+  let Close: React.ReactNode = null;
 
-  function renderCloseButton(closeButton: any) {
-    if (!closeButton) return;
-
-    const props = { closeToast, type, theme };
-
-    if (isFn(closeButton)) return closeButton(props);
-
-    if (React.isValidElement(closeButton))
-      return React.cloneElement(closeButton, props);
+  if (closeButton === false) {
+    // hide
+  } else if (isFn(closeButton)) {
+    Close = closeButton(closeButtonProps);
+  } else if (React.isValidElement(closeButton)) {
+    Close = React.cloneElement(closeButton, closeButtonProps);
+  } else {
+    Close = CloseButton(closeButtonProps);
   }
 
   return (
@@ -110,18 +93,19 @@ export const Toast: React.FC<ToastProps> = props => {
           }
           style={bodyStyle}
         >
-          {Icon && (
+          {iconOut != null && (
             <div
               className={cx(`${Default.CSS_NAMESPACE}__toast-icon`, {
-                [`${Default.CSS_NAMESPACE}--animate-icon ${Default.CSS_NAMESPACE}__zoom-enter`]: !isLoading
+                [`${Default.CSS_NAMESPACE}--animate-icon ${Default.CSS_NAMESPACE}__zoom-enter`]:
+                  !isLoading
               })}
             >
-              {Icon}
+              {iconOut}
             </div>
           )}
           <div>{children}</div>
         </div>
-        {renderCloseButton(closeButton)}
+        {Close}
         {(autoClose || isProgressControlled) && (
           <ProgressBar
             {...(updateId && !isProgressControlled

@@ -69,9 +69,9 @@ describe('ToastContainer', () => {
     act(() => {
       toast.dismiss();
       jest.runAllTimers();
-
-      triggerAnimationEnd(toasts);
     });
+
+    triggerAnimationEnd(toasts);
 
     expect(screen.queryAllByText(/coucou/).length).toBe(0);
   });
@@ -93,9 +93,9 @@ describe('ToastContainer', () => {
     act(() => {
       toast.dismiss(0);
       jest.runAllTimers();
-
-      triggerAnimationEnd(screen.getByText('toast id 0'));
     });
+
+    triggerAnimationEnd(screen.getByText('toast id 0'));
 
     expect(screen.getAllByText(/toast id/).length).toBe(1);
   });
@@ -211,8 +211,9 @@ describe('ToastContainer', () => {
     act(() => {
       toast.dismiss();
       jest.runAllTimers();
-      triggerAnimationEnd(screen.getByText('hello'));
     });
+
+    triggerAnimationEnd(screen.getByText('hello'));
 
     act(() => {
       toast('hello', {
@@ -331,10 +332,45 @@ describe('ToastContainer', () => {
     act(() => {
       fireEvent.click(screen.getByLabelText('close'));
       jest.runAllTimers();
-      triggerAnimationEnd(screen.getByText('hello'));
     });
 
+    triggerAnimationEnd(screen.getByText('hello'));
+
     expect(screen.queryByText('hello')).toBe(null);
+  });
+
+  it('Should be able to specify a custom icon', () => {
+    render(<ToastContainer />);
+    act(() => {
+      toast('string', {
+        icon: '🚀'
+      });
+      toast('component', {
+        icon: () => <p>content</p>
+      });
+      toast('disable', {
+        icon: false
+      });
+      jest.runAllTimers();
+    });
+
+    expect(
+      screen
+        .getByText('string')
+        .parentElement.getElementsByClassName('Toastify__toast-icon')[0]
+        .textContent
+    ).toEqual('🚀');
+    expect(
+      screen
+        .getByText('component')
+        .parentElement.getElementsByClassName('Toastify__toast-icon')[0]
+        .textContent
+    ).toEqual('content');
+    expect(
+      screen
+        .getByText('disable')
+        .parentElement.getElementsByClassName('Toastify__toast-icon').length
+    ).toEqual(0);
   });
 
   describe('Multiple container support', () => {
@@ -482,8 +518,9 @@ describe('ToastContainer', () => {
       act(() => {
         toast.dismiss(toastId);
         jest.runAllTimers();
-        triggerAnimationEnd(screen.getByText('toast-1'));
       });
+
+      triggerAnimationEnd(screen.getByText('toast-1'));
 
       expect(screen.queryByText('toast-1')).toBe(null);
 
@@ -519,8 +556,9 @@ describe('ToastContainer', () => {
       act(() => {
         toast.dismiss(toastId);
         jest.runAllTimers();
-        triggerAnimationEnd(screen.getByText('toast-1'));
       });
+
+      triggerAnimationEnd(screen.getByText('toast-1'));
 
       expect(screen.queryByText('toast-1')).toBe(null);
 
